@@ -62,21 +62,18 @@ public class ASTListener extends ICSSBaseListener {
 		if (ctx.CLASS_IDENT() != null) {
 			ClassSelector classSelector = new ClassSelector(ctx.CLASS_IDENT().getText());
 			currentContainer.peek().addChild(classSelector);
-			currentContainer.push(classSelector);
 		} else if (ctx.ID_IDENT() != null) {
 			IdSelector idSelector = new IdSelector(ctx.ID_IDENT().getText());
 			currentContainer.peek().addChild(idSelector);
-			currentContainer.push(idSelector);
 		} else if (ctx.LOWER_IDENT() != null) {
 			TagSelector tagSelector = new TagSelector(ctx.LOWER_IDENT().getText());
 			currentContainer.peek().addChild(tagSelector);
-			currentContainer.push(tagSelector);
 		}
 	}
 
 	@Override
 	public void exitSelector(ICSSParser.SelectorContext ctx) {
-		currentContainer.pop();
+//		currentContainer.pop();
 	}
 
 	@Override
@@ -129,24 +126,26 @@ public class ASTListener extends ICSSBaseListener {
 
 	@Override
 	public void enterExpression(ICSSParser.ExpressionContext ctx) {
-		if(ctx.MUL() != null) {
-			VariableReference varRef = new VariableReference(ctx.MUL().getText());
-			currentContainer.peek().addChild(varRef);
-		} else if(ctx.DIV() != null) {
-			VariableReference varRef = new VariableReference(ctx.DIV().getText());
-			currentContainer.peek().addChild(varRef);
-		} else if(ctx.ADD() != null) {
-			VariableReference varRef = new VariableReference(ctx.ADD().getText());
-			currentContainer.peek().addChild(varRef);
-		} else if(ctx.SUB() != null) {
-			VariableReference varRef = new VariableReference(ctx.SUB().getText());
-			currentContainer.peek().addChild(varRef);
+		if (ctx.MUL() != null) {
+			MultiplyOperation multiplyOperation = new MultiplyOperation();
+			currentContainer.peek().addChild(multiplyOperation);
+			currentContainer.push(multiplyOperation);  // Push the operation to handle its operands
+		} else if (ctx.ADD() != null) {
+			AddOperation addOperation = new AddOperation();
+			currentContainer.peek().addChild(addOperation);
+			currentContainer.push(addOperation);  // Push the operation
+		} else if (ctx.SUB() != null) {
+			SubtractOperation subtractOperation = new SubtractOperation();
+			currentContainer.peek().addChild(subtractOperation);
+			currentContainer.push(subtractOperation);  // Push the operation
 		}
 	}
 
 	@Override
 	public void exitExpression(ICSSParser.ExpressionContext ctx) {
-		currentContainer.pop();
+		if (ctx.MUL() != null || ctx.ADD() != null || ctx.SUB() != null) {
+			currentContainer.pop();  // Pop the operation
+		}
 	}
 
 	@Override
