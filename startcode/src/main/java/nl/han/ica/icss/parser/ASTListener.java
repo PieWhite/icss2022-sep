@@ -60,11 +60,17 @@ public class ASTListener extends ICSSBaseListener {
 	@Override
 	public void enterSelector(ICSSParser.SelectorContext ctx) {
 		if (ctx.CLASS_IDENT() != null) {
-			new ClassSelector(ctx.CLASS_IDENT().getText());
+			ClassSelector classSelector = new ClassSelector(ctx.CLASS_IDENT().getText());
+			currentContainer.peek().addChild(classSelector);
+			currentContainer.push(classSelector);
 		} else if (ctx.ID_IDENT() != null) {
-			new IdSelector(ctx.ID_IDENT().getText());
+			IdSelector idSelector = new IdSelector(ctx.ID_IDENT().getText());
+			currentContainer.peek().addChild(idSelector);
+			currentContainer.push(idSelector);
 		} else if (ctx.LOWER_IDENT() != null) {
-			new TagSelector(ctx.LOWER_IDENT().getText());
+			TagSelector tagSelector = new TagSelector(ctx.LOWER_IDENT().getText());
+			currentContainer.peek().addChild(tagSelector);
+			currentContainer.push(tagSelector);
 		}
 	}
 

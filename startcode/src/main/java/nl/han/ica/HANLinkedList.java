@@ -66,7 +66,8 @@ public class HANLinkedList<T> implements IHANLinkedList<T> {
     @Override
     public void removeFirst() {
         if (nodes.isEmpty()) {
-            throw new NoSuchElementException();
+            throw new NoSuchElementException("The list is empty.");
+
         }
         nodes.remove(0);
     }
@@ -74,7 +75,8 @@ public class HANLinkedList<T> implements IHANLinkedList<T> {
     @Override
     public T getFirst() {
         if (nodes.isEmpty()) {
-            throw new NoSuchElementException();
+            throw new NoSuchElementException("The list is empty.");
+
         }
         return nodes.get(0).data;
     }
