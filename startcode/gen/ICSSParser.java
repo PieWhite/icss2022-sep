@@ -19,7 +19,7 @@ public class ICSSParser extends Parser {
 		IF=1, ELSE=2, BOX_BRACKET_OPEN=3, BOX_BRACKET_CLOSE=4, TRUE=5, FALSE=6, 
 		PIXELSIZE=7, PERCENTAGE=8, SCALAR=9, COLOR=10, ID_IDENT=11, CLASS_IDENT=12, 
 		LOWER_IDENT=13, CAPITAL_IDENT=14, WS=15, OPEN_BRACE=16, CLOSE_BRACE=17, 
-		SEMICOLON=18, COLON=19, PLUS=20, MIN=21, MUL=22, DIV=23, ASSIGNMENT_OPERATOR=24;
+		SEMICOLON=18, COLON=19, ADD=20, SUB=21, MUL=22, DIV=23, ASSIGNMENT_OPERATOR=24;
 	public static final int
 		RULE_stylesheet = 0, RULE_statement = 1, RULE_selectorRule = 2, RULE_selector = 3, 
 		RULE_variableAssignment = 4, RULE_ifClause = 5, RULE_elseClause = 6, RULE_declaration = 7, 
@@ -45,7 +45,7 @@ public class ICSSParser extends Parser {
 			null, "IF", "ELSE", "BOX_BRACKET_OPEN", "BOX_BRACKET_CLOSE", "TRUE", 
 			"FALSE", "PIXELSIZE", "PERCENTAGE", "SCALAR", "COLOR", "ID_IDENT", "CLASS_IDENT", 
 			"LOWER_IDENT", "CAPITAL_IDENT", "WS", "OPEN_BRACE", "CLOSE_BRACE", "SEMICOLON", 
-			"COLON", "PLUS", "MIN", "MUL", "DIV", "ASSIGNMENT_OPERATOR"
+			"COLON", "ADD", "SUB", "MUL", "DIV", "ASSIGNMENT_OPERATOR"
 		};
 	}
 	private static final String[] _SYMBOLIC_NAMES = makeSymbolicNames();
@@ -649,8 +649,8 @@ public class ICSSParser extends Parser {
 		}
 		public TerminalNode MUL() { return getToken(ICSSParser.MUL, 0); }
 		public TerminalNode DIV() { return getToken(ICSSParser.DIV, 0); }
-		public TerminalNode PLUS() { return getToken(ICSSParser.PLUS, 0); }
-		public TerminalNode MIN() { return getToken(ICSSParser.MIN, 0); }
+		public TerminalNode ADD() { return getToken(ICSSParser.ADD, 0); }
+		public TerminalNode SUB() { return getToken(ICSSParser.SUB, 0); }
 		public ExpressionContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
@@ -730,7 +730,7 @@ public class ICSSParser extends Parser {
 						if (!(precpred(_ctx, 2))) throw new FailedPredicateException(this, "precpred(_ctx, 2)");
 						setState(86);
 						_la = _input.LA(1);
-						if ( !(_la==PLUS || _la==MIN) ) {
+						if ( !(_la==ADD || _la==SUB) ) {
 						_errHandler.recoverInline(this);
 						}
 						else {

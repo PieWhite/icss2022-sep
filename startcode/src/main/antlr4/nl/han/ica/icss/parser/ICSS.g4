@@ -36,8 +36,8 @@ OPEN_BRACE: '{';
 CLOSE_BRACE: '}';
 SEMICOLON: ';';
 COLON: ':';
-PLUS: '+';
-MIN: '-';
+ADD: '+';
+SUB: '-';
 MUL: '*';
 DIV: '/';
 ASSIGNMENT_OPERATOR: ':=';
@@ -66,13 +66,17 @@ elseClause: ELSE BOX_BRACKET_OPEN statement* BOX_BRACKET_CLOSE;
 declaration: LOWER_IDENT COLON expression SEMICOLON;
 
 expression: expression (MUL | DIV) expression
-          | expression (PLUS | MIN) expression
+          | expression (ADD | SUB) expression
           | primaryExpression;
+
+
 
 primaryExpression: PIXELSIZE
                  | PERCENTAGE
                  | SCALAR
                  | COLOR
                  | CAPITAL_IDENT
+                 | TRUE
+                 | FALSE
                  | BOX_BRACKET_OPEN expression BOX_BRACKET_CLOSE;
 
