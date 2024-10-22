@@ -85,22 +85,22 @@ public class HANLinkedList<T> implements IHANLinkedList<T> {
     }
 
 //    @Override
-//    public Iterator<T> iterator() {
-//        return new Iterator<T>() {
-//            private int currentIndex = 0;
-//
-//            @Override
-//            public boolean hasNext() {
-//                return currentIndex < nodes.size();
-//            }
-//
-//            @Override
-//            public T next() {
-//                if (!hasNext()) {
-//                    throw new NoSuchElementException();
-//                }
-//                return nodes.get(currentIndex++).data;
-//            }
-//        };
-//    }
+    public Iterator<T> iterator() {
+        return new Iterator<T>() {
+            private int currentIndex = 0;
+
+            @Override
+            public boolean hasNext() {
+                return currentIndex < nodes.size();
+            }
+
+            @Override
+            public T next() {
+                if (!hasNext()) {
+                    throw new NoSuchElementException();
+                }
+                return nodes.get(currentIndex++).data;
+            }
+        };
+    }
 }
