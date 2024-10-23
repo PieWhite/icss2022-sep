@@ -79,7 +79,7 @@ public class ASTListener extends ICSSBaseListener {
 	@Override
 	public void enterVariableAssignment(ICSSParser.VariableAssignmentContext ctx) {
 		VariableAssignment varAssign = new VariableAssignment();
-		currentContainer.peek().addChild(varAssign);
+		varAssign.name = new VariableReference(ctx.CAPITAL_IDENT().getText());
 		currentContainer.push(varAssign);
 	}
 

@@ -58,9 +58,9 @@ selector: ID_IDENT | CLASS_IDENT | LOWER_IDENT;
 
 variableAssignment: CAPITAL_IDENT ASSIGNMENT_OPERATOR expression SEMICOLON;
 
-ifClause: IF expression BOX_BRACKET_OPEN statement* BOX_BRACKET_CLOSE (elseClause)?;
+ifClause: IF BOX_BRACKET_OPEN expression BOX_BRACKET_CLOSE OPEN_BRACE statement* CLOSE_BRACE (elseClause)?;
 
-elseClause: ELSE BOX_BRACKET_OPEN statement* BOX_BRACKET_CLOSE;
+elseClause: ELSE OPEN_BRACE statement* CLOSE_BRACE;
 
 declaration: LOWER_IDENT COLON expression SEMICOLON;
 
