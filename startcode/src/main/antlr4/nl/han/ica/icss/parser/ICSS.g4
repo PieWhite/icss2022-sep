@@ -55,7 +55,7 @@ propertyName: LOWER_IDENT;
 
 variableAssignment: variableReference ASSIGNMENT_OPERATOR expression+ SEMICOLON;
 
-ifClause: IF BOX_BRACKET_OPEN (variableReference | TRUE | FALSE ) BOX_BRACKET_CLOSE OPEN_BRACE statement CLOSE_BRACE elseClause?;
+ifClause: IF BOX_BRACKET_OPEN (variableReference | bool ) BOX_BRACKET_CLOSE OPEN_BRACE statement CLOSE_BRACE elseClause?;
 
 elseClause: ELSE OPEN_BRACE statement CLOSE_BRACE;
 

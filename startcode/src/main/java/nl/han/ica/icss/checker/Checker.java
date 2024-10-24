@@ -27,6 +27,7 @@ public class Checker {
     }
 
     private void checkNode(ASTNode node) {
+        // deze checkt of de variabelen bestaan
         if (node instanceof VariableAssignment) {
             // Variable assignment: track the variable in the current scope
             String variableName = ((VariableAssignment) node).name.name;
@@ -39,10 +40,74 @@ public class Checker {
                 node.setError("Variable " + variableName + " is not defined.");
             }
         }
+        // deze checkt of kleuren in sommen zitten
+        if (node instanceof AddOperation || node instanceof SubtractOperation || node instanceof MultiplyOperation) {
+            // Color literals are not allowed in these operations
+            Expression left = ((Operation) node).lhs;
+            Expression right = ((Operation) node).rhs;
+
+            if (inferExpressionType(left) == ExpressionType.COLOR || inferExpressionType(right) == ExpressionType.COLOR) {
+                node.setError("Colors cannot be used in arithmetic operations.");
+            }
+        }
+        // deze checkt of de waardes wel het zelfde zijn dus px + px
+        if (node instanceof Declaration) {
+            Declaration declaration = (Declaration) node;
+            String propertyName = declaration.property.name;
+            ExpressionType valueType = inferExpressionType(declaration.expression);
+
+            // Check based on property name
+            if (propertyName.equals("width") || propertyName.equals("height")) {
+                if (valueType != ExpressionType.PIXEL) {
+                    node.setError(propertyName + " must have a pixel value.");
+                }
+            } else if (propertyName.equals("color")) {
+                if (valueType != ExpressionType.COLOR) {
+                    node.setError("color must have a color value.");
+                }
+            }
+        }
+        // deze checkt of de som wel klopt dus  10px + 10px en niet 10px + 10%
+        if (node instanceof AddOperation || node instanceof SubtractOperation) {
+            // Both sides of the operation should have the same type
+            Expression left = ((Operation) node).lhs;
+            Expression right = ((Operation) node).rhs;
+
+            ExpressionType leftType = inferExpressionType(left);
+            ExpressionType rightType = inferExpressionType(right);
+
+            if (leftType != rightType) {
+                node.setError("Operands of " + (node instanceof AddOperation ? "+" : "-") + " must be of the same type.");
+            }
+        }
+        // deze checkt of de if statements wel boolean worden.
+        if (node instanceof IfClause) {
+            IfClause ifClause = (IfClause) node;
+
+            // Let's assume the condition is stored in a field named `condition`
+            Expression condition = ifClause.condition;  // or adjust this to match your actual field
+
+            ExpressionType conditionType = inferExpressionType(condition);
+
+            // The condition must be a boolean (TRUE or FALSE)
+            if (conditionType != ExpressionType.BOOL) {
+                node.setError("If statement condition must be a boolean.");
+            }
+        }
+
+        // deze checkt of variable alleen binnen scope gebruikt worden
+        if (node instanceof Stylerule || node instanceof IfClause || node instanceof ElseClause) {
+            // Enter a new scope for blocks like Stylerule and IfClause
+            variableTypes.addFirst(new HashMap<>());
+        }
 
         // Recursively check child nodes
         for (ASTNode child : node.getChildren()) {
             checkNode(child);
+        }
+        if (node instanceof Stylerule || node instanceof IfClause || node instanceof ElseClause) {
+            // Leave the scope when exiting the block
+            variableTypes.removeFirst();
         }
     }
 
@@ -77,8 +142,22 @@ public class Checker {
                     return scope.get(variableName);
                 }
             }
+            //dit fixt dat sommen van variabelen niet werken dus parwidth + 2 * 10px
+        } else if (expression instanceof Operation) {
+            ExpressionType leftType = inferExpressionType(((Operation) expression).lhs);
+            ExpressionType rightType = inferExpressionType(((Operation) expression).rhs);
+            if (leftType == rightType) {
+                return leftType;
+            } else if (leftType == ExpressionType.SCALAR && rightType == ExpressionType.PIXEL) {
+                return ExpressionType.PIXEL;
+            } else if (leftType == ExpressionType.PIXEL && rightType == ExpressionType.SCALAR) {
+                return ExpressionType.PIXEL;
+            }
+
         }
         return ExpressionType.UNDEFINED;
     }
+
+
 
 }
