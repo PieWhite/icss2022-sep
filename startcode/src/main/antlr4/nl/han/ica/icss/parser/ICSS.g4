@@ -45,37 +45,42 @@ ASSIGNMENT_OPERATOR: ':=';
 
 
 //--- PARSER: ---
-stylesheet: (statement)* EOF;
+stylesheet: variableAssignment* selectorRule* EOF;
 
-statement: variableAssignment
-         | ifClause
-         | declaration
-         | selectorRule;
+selectorRule: selector OPEN_BRACE statement CLOSE_BRACE;
 
-selectorRule: selector OPEN_BRACE statement* CLOSE_BRACE;
+declaration: propertyName COLON expression SEMICOLON;
+
+propertyName: LOWER_IDENT;
+
+variableAssignment: variableReference ASSIGNMENT_OPERATOR expression+ SEMICOLON;
+
+ifClause: IF BOX_BRACKET_OPEN (variableReference | TRUE | FALSE ) BOX_BRACKET_CLOSE OPEN_BRACE statement CLOSE_BRACE elseClause?;
+
+elseClause: ELSE OPEN_BRACE statement CLOSE_BRACE;
+
+expression: literal
+          | expression MUL expression
+          | expression (ADD | SUB) expression;
+
+pixelSize: PIXELSIZE;
+percentage: PERCENTAGE;
+scalar: SCALAR;
+color: COLOR;
+bool: TRUE | FALSE;
+
+variableReference: CAPITAL_IDENT;
+
+literal:           pixelSize
+                 | percentage
+                 | scalar
+                 | color
+                 | variableReference
+                 | bool;
+
 
 selector: ID_IDENT | CLASS_IDENT | LOWER_IDENT;
 
-variableAssignment: CAPITAL_IDENT ASSIGNMENT_OPERATOR expression SEMICOLON;
-
-ifClause: IF BOX_BRACKET_OPEN expression BOX_BRACKET_CLOSE OPEN_BRACE statement* CLOSE_BRACE (elseClause)?;
-
-elseClause: ELSE OPEN_BRACE statement* CLOSE_BRACE;
-
-declaration: LOWER_IDENT COLON expression SEMICOLON;
-
-expression: expression MUL expression
-          | expression (ADD | SUB) expression
-          | primaryExpression;
-
-
-
-primaryExpression: PIXELSIZE
-                 | PERCENTAGE
-                 | SCALAR
-                 | COLOR
-                 | CAPITAL_IDENT
-                 | TRUE
-                 | FALSE
-                 | BOX_BRACKET_OPEN expression BOX_BRACKET_CLOSE;
-
+statement: (declaration
+         | ifClause
+         | variableAssignment)*;
