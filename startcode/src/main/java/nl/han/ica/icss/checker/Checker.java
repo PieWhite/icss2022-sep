@@ -28,63 +28,57 @@ public class Checker {
 
     private void checkNode(ASTNode node) {
         if (node instanceof VariableAssignment) {
-            checkVariableAssignment((VariableAssignment) node);
-        } else if (node instanceof AddOperation || node instanceof SubtractOperation || node instanceof MultiplyOperation) {
-            checkOperation((Operation) node);
+            // Variable assignment: track the variable in the current scope
+            String variableName = ((VariableAssignment) node).name.name;
+            ExpressionType expressionType = inferExpressionType(((VariableAssignment) node).expression);
+            variableTypes.getFirst().put(variableName, expressionType);
+        } else if (node instanceof VariableReference) {
+            // Check if the variable has been defined in any scope
+            String variableName = ((VariableReference) node).name;
+            if (!isVariableDefined(variableName)) {
+                node.setError("Variable " + variableName + " is not defined.");
+            }
         }
-        // Add more checks for other node types as needed
 
+        // Recursively check child nodes
         for (ASTNode child : node.getChildren()) {
             checkNode(child);
         }
     }
 
-    private void checkVariableAssignment(VariableAssignment varAssign) {
-        String varName = varAssign.name.name;
-        ExpressionType varType = determineExpressionType(varAssign.expression);
-        variableTypes.getFirst().put(varName, varType);
-    }
-
-    private void checkOperation(Operation operation) {
-        ExpressionType leftType = determineExpressionType(operation.lhs);
-        ExpressionType rightType = determineExpressionType(operation.rhs);
-
-        if (leftType != rightType && !(isScalarOperation(leftType, rightType))) {
-            operation.setError("Type mismatch in operation: " + leftType + " and " + rightType);
-            System.out.println(new SemanticError("Type mismatch in operation: " + leftType + " and " + rightType));
-        }
-    }
-
-    private boolean isScalarOperation(ExpressionType leftType, ExpressionType rightType) {
-        return (leftType == ExpressionType.SCALAR || rightType == ExpressionType.SCALAR) &&
-                (leftType != ExpressionType.UNDEFINED && rightType != ExpressionType.UNDEFINED);
-    }
-
-    private ExpressionType getVariableType(VariableReference varRef) {
-        String varName = varRef.name;
+    private boolean isVariableDefined(String variableName) {
         for (int i = 0; i < variableTypes.getSize(); i++) {
             HashMap<String, ExpressionType> scope = variableTypes.get(i);
-            if (scope.containsKey(varName)) {
-                return scope.get(varName);
+            if (scope.containsKey(variableName)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private ExpressionType inferExpressionType(Expression expression) {
+        // Determine the type of the expression (PIXEL, PERCENTAGE, etc.)
+        if (expression instanceof PixelLiteral) {
+            return ExpressionType.PIXEL;
+        } else if (expression instanceof PercentageLiteral) {
+            return ExpressionType.PERCENTAGE;
+        } else if (expression instanceof ScalarLiteral) {
+            return ExpressionType.SCALAR;
+        } else if (expression instanceof ColorLiteral) {
+            return ExpressionType.COLOR;
+        } else if (expression instanceof BoolLiteral) {
+            return ExpressionType.BOOL;
+        } else if (expression instanceof VariableReference) {
+            // Get the type of the referenced variable
+            String variableName = ((VariableReference) expression).name;
+            for (int i = 0; i < variableTypes.getSize(); i++) {
+                HashMap<String, ExpressionType> scope = variableTypes.get(i);
+                if (scope.containsKey(variableName)) {
+                    return scope.get(variableName);
+                }
             }
         }
         return ExpressionType.UNDEFINED;
     }
-    private ExpressionType determineExpressionType(ASTNode node) {
-        if (node instanceof PixelLiteral) {
-            return ExpressionType.PIXEL;
-        } else if (node instanceof PercentageLiteral) {
-            return ExpressionType.PERCENTAGE;
-        } else if (node instanceof ScalarLiteral) {
-            return ExpressionType.SCALAR;
-        } else if (node instanceof ColorLiteral) {
-            return ExpressionType.COLOR;
-        } else if (node instanceof BoolLiteral) {
-            return ExpressionType.BOOL;
-        } else if (node instanceof VariableReference) {
-            return getVariableType((VariableReference) node);
 
-        }
-        return ExpressionType.UNDEFINED;
-    }
 }

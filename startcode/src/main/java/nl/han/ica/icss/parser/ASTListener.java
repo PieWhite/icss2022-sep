@@ -218,7 +218,7 @@ public class ASTListener extends ICSSBaseListener {
 
 		}
 	}
-	
+
 	@Override
 	public void exitExpression(ICSSParser.ExpressionContext ctx) {
 		if (ctx.MUL() != null || ctx.ADD() != null || ctx.SUB() != null) {
