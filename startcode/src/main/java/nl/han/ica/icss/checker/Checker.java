@@ -27,6 +27,13 @@ public class Checker {
     }
 
     private void checkNode(ASTNode node) {
+
+        // deze checkt of variablen alleen binnen scope gebruikt worden
+        if (node instanceof Stylerule || node instanceof IfClause || node instanceof ElseClause) {
+            // Enter a new scope for blocks like Stylerule and IfClause
+            variableTypes.addFirst(new HashMap<>());
+        }
+
         // deze checkt of de variabelen bestaan
         if (node instanceof VariableAssignment) {
             // Variable assignment: track the variable in the current scope
@@ -80,26 +87,8 @@ public class Checker {
                 node.setError("Operands of " + (node instanceof AddOperation ? "+" : "-") + " must be of the same type.");
             }
         }
-        // deze checkt of de if statements wel boolean worden.
-        if (node instanceof IfClause) {
-            IfClause ifClause = (IfClause) node;
 
-            // Let's assume the condition is stored in a field named `condition`
-            Expression condition = ifClause.condition;  // or adjust this to match your actual field
 
-            ExpressionType conditionType = inferExpressionType(condition);
-
-            // The condition must be a boolean (TRUE or FALSE)
-            if (conditionType != ExpressionType.BOOL) {
-                node.setError("If statement condition must be a boolean.");
-            }
-        }
-
-        // deze checkt of variable alleen binnen scope gebruikt worden
-        if (node instanceof Stylerule || node instanceof IfClause || node instanceof ElseClause) {
-            // Enter a new scope for blocks like Stylerule and IfClause
-            variableTypes.addFirst(new HashMap<>());
-        }
 
         // Recursively check child nodes
         for (ASTNode child : node.getChildren()) {
