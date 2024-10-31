@@ -47,14 +47,14 @@ public class ASTListener extends ICSSBaseListener {
 
 	@Override
 	public void enterStyleRule(ICSSParser.StyleRuleContext ctx) {
-		ASTNode selectorRule = new Stylerule();
-		currentContainer.push(selectorRule);
+		ASTNode styleRule = new Stylerule();
+		currentContainer.push(styleRule);
 	}
 
 	@Override
 	public void exitStyleRule(ICSSParser.StyleRuleContext ctx) {
-		ASTNode selectorRule = currentContainer.pop();
-		currentContainer.peek().addChild(selectorRule);
+		ASTNode styleRule = currentContainer.pop();
+		currentContainer.peek().addChild(styleRule);
 	}
 
 	@Override
@@ -68,12 +68,10 @@ public class ASTListener extends ICSSBaseListener {
 		} else if (ctx.LOWER_IDENT() != null) {
 			selector = new TagSelector(ctx.LOWER_IDENT().getText());
 		}
-
 		if (selector != null) {
 			currentContainer.push(selector); // Push the selector onto the stack
 		}
 	}
-
 	@Override
 	public void exitSelector(ICSSParser.SelectorContext ctx) {
 		if (ctx.CLASS_IDENT() != null || ctx.ID_IDENT() != null || ctx.LOWER_IDENT() != null) {
@@ -81,9 +79,6 @@ public class ASTListener extends ICSSBaseListener {
 			currentContainer.peek().addChild(selector); // Add the selector to the parent node
 		}
 	}
-
-
-
 	@Override
 	public void enterVariableAssignment(ICSSParser.VariableAssignmentContext ctx) {
 		ASTNode variableAssignment = new VariableAssignment();
@@ -101,24 +96,18 @@ public class ASTListener extends ICSSBaseListener {
 	public void enterDeclaration(ICSSParser.DeclarationContext ctx) {
 		ASTNode declaration = new Declaration();
 		currentContainer.push(declaration);
-
-
 	}
-
 	@Override
 	public void exitDeclaration(ICSSParser.DeclarationContext ctx) {
 		ASTNode declaration = currentContainer.pop();
 		currentContainer.peek().addChild(declaration);
 	}
-
 	@Override
 	public void enterPropertyName(ICSSParser.PropertyNameContext ctx) {
 		// When entering a property name, create a PropertyName node and attach it to the current Declaration node
 		ASTNode propertyName = new PropertyName(ctx.getText());
 		currentContainer.peek().addChild(propertyName); // Attach to the current declaration
 	}
-
-
 	@Override
 	public void enterIfClause(ICSSParser.IfClauseContext ctx) {
 		ASTNode ifClause = new IfClause();
@@ -176,33 +165,6 @@ public class ASTListener extends ICSSBaseListener {
 		ASTNode bool = new BoolLiteral(ctx.getText());
 		currentContainer.peek().addChild(bool);
 	}
-
-
-//	@Override
-//	public void enterLiteral(ICSSParser.LiteralContext ctx) {
-//		ASTNode literal = null;
-//
-//		if (ctx.PIXELSIZE() != null) {
-//			literal = new PixelLiteral(ctx.PIXELSIZE().getText());
-//		} else if (ctx.PERCENTAGE() != null) {
-//			literal = new PercentageLiteral(ctx.PERCENTAGE().getText());
-//		} else if (ctx.SCALAR() != null) {
-//			literal = new ScalarLiteral(ctx.SCALAR().getText());
-//		} else if (ctx.COLOR() != null) {
-//			literal = new ColorLiteral(ctx.COLOR().getText());
-//		} else if (ctx.variableReference() != null) {
-//			literal = new VariableReference(ctx.variableReference().getText());
-//		} else if (ctx.TRUE() != null) {
-//			literal = new BoolLiteral("TRUE");
-//		} else if (ctx.FALSE() != null) {
-//			literal = new BoolLiteral("FALSE");
-//		}
-//
-//		if (literal != null) {
-//			currentContainer.peek().addChild(literal);
-//		}
-//	}
-
 	@Override
 	public void enterExpression(ICSSParser.ExpressionContext ctx) {
 		ASTNode operation = null;
@@ -215,7 +177,6 @@ public class ASTListener extends ICSSBaseListener {
 		}
 		if (operation != null) {
 			currentContainer.push(operation); // Push the selector onto the stack
-
 		}
 	}
 
