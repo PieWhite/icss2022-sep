@@ -45,23 +45,43 @@ ASSIGNMENT_OPERATOR: ':=';
 
 
 //--- PARSER: ---
-stylesheet: variableAssignment* selectorRule* EOF;
+stylesheet
+    : (variableAssignment | styleRule)* EOF
+    ;
 
-selectorRule: selector OPEN_BRACE statement CLOSE_BRACE;
+styleRule
+    : selector '{' statement '}'
+    ;
 
-declaration: propertyName COLON expression SEMICOLON;
+declaration
+    : propertyName ':' expression ';'
+    ;
 
-propertyName: LOWER_IDENT;
+propertyName
+    : LOWER_IDENT
+    ;
 
-variableAssignment: variableReference ASSIGNMENT_OPERATOR expression+ SEMICOLON;
+variableAssignment
+    : variableReference ':=' expression ';'
+    ;
 
-ifClause: IF BOX_BRACKET_OPEN (variableReference | bool ) BOX_BRACKET_CLOSE OPEN_BRACE statement CLOSE_BRACE elseClause?;
+//ifClause: IF BOX_BRACKET_OPEN (variableReference | bool ) BOX_BRACKET_CLOSE OPEN_BRACE statement CLOSE_BRACE elseClause?;
 
-elseClause: ELSE OPEN_BRACE statement CLOSE_BRACE;
+ifClause
+    : 'if' '[' condition ']' '{' statement '}' elseClause?
+    ;
 
-expression: literal
-          | expression MUL expression
-          | expression (ADD | SUB) expression;
+//elseClause: ELSE OPEN_BRACE statement CLOSE_BRACE;
+
+elseClause
+    : 'else' '{' statement '}'
+    ;
+
+expression
+    : literal
+    | expression '*' expression
+    | expression ('+' | '-') expression
+    ;
 
 pixelSize: PIXELSIZE;
 percentage: PERCENTAGE;
@@ -69,18 +89,32 @@ scalar: SCALAR;
 color: COLOR;
 bool: TRUE | FALSE;
 
-variableReference: CAPITAL_IDENT;
+variableReference
+    : CAPITAL_IDENT
+    ;
 
-literal:           pixelSize
-                 | percentage
-                 | scalar
-                 | color
-                 | variableReference
-                 | bool;
+literal
+    : pixelSize
+    | percentage
+    | scalar
+    | color
+    | variableReference
+    | bool;
 
+condition
+    : variableReference
+    | bool
+    ;
 
-selector: ID_IDENT | CLASS_IDENT | LOWER_IDENT;
+selector
+        :
+        | ID_IDENT
+        | CLASS_IDENT
+        | LOWER_IDENT
+        ;
 
-statement: (declaration
-         | ifClause
-         | variableAssignment)*;
+statement
+    : (declaration
+    | ifClause
+    | variableAssignment)*
+    ;
