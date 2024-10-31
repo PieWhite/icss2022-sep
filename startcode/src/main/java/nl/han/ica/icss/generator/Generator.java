@@ -1,85 +1,87 @@
 package nl.han.ica.icss.generator;
 
-
 import nl.han.ica.icss.ast.*;
-import nl.han.ica.icss.ast.literals.ColorLiteral;
-import nl.han.ica.icss.ast.literals.PercentageLiteral;
-import nl.han.ica.icss.ast.literals.PixelLiteral;
-import nl.han.ica.icss.ast.literals.ScalarLiteral;
-import nl.han.ica.icss.ast.selectors.ClassSelector;
-import nl.han.ica.icss.ast.selectors.IdSelector;
-import nl.han.ica.icss.ast.selectors.TagSelector;
-
 import java.util.List;
-import java.util.stream.Collectors;
+
+import nl.han.ica.icss.ast.literals.*;
+import nl.han.ica.icss.ast.operations.AddOperation;
+import nl.han.ica.icss.ast.operations.MultiplyOperation;
+import nl.han.ica.icss.ast.operations.SubtractOperation;
 
 public class Generator {
 
-	private final StringBuilder stringBuilder;
+    public String generate(AST ast) {
+        StringBuilder css = new StringBuilder();
+        generateNode(ast.root, css, 0);
+        return css.toString();
+    }
 
-	public Generator() {
-		this.stringBuilder = new StringBuilder();
+    private void generateNode(ASTNode node, StringBuilder css, int indentLevel) {
+        String indent = "  ".repeat(indentLevel); // Two spaces per scope level
+
+        if (node instanceof Stylesheet) {
+            for (ASTNode child : node.getChildren()) {
+                generateNode(child, css, indentLevel);
+            }
+        } else if (node instanceof Stylerule) {
+            Stylerule stylerule = (Stylerule) node;
+            // Append selectors
+            css.append(indent);
+            List<Selector> selectors = stylerule.selectors;
+            for (int i = 0; i < selectors.size(); i++) {
+                css.append(selectors.get(i).toString());
+                if (i < selectors.size() - 1) {
+                    css.append(", ");
+                }
+            }
+            css.append(" {\n");
+            // Generate declarations and nested rules
+            for (ASTNode child : stylerule.getChildren()) {
+                generateNode(child, css, indentLevel + 1);
+            }
+            css.append(indent).append("}\n");
+        } else if (node instanceof Declaration) {
+            Declaration declaration = (Declaration) node;
+            css.append(indent).append(declaration.property.name).append(": ");
+            css.append(expressionToString(declaration.expression)).append(";\n");
+    	}
 	}
 
-	public String generate(AST ast) {
-		this.generateNode(ast.root);
-		return stringBuilder.toString();
-	}
+    private String expressionToString(Expression expression) {
+        if (expression instanceof PixelLiteral) {
+            PixelLiteral pixel = (PixelLiteral) expression;
+            return pixel.value + "px";
+        } else if (!(expression instanceof PercentageLiteral)) {
+			if (expression instanceof ScalarLiteral) {
+				ScalarLiteral scalar = (ScalarLiteral) expression;
+				return String.valueOf(scalar.value);
+			} else if (expression instanceof ColorLiteral) {
+				ColorLiteral color = (ColorLiteral) expression;
+				return color.value;
+			} else if (expression instanceof BoolLiteral) {
+				BoolLiteral bool = (BoolLiteral) expression;
+				return String.valueOf(bool.value);
+			} else if (expression instanceof Operation) {
+				Operation operation = (Operation) expression;
+				String left = expressionToString(operation.lhs);
+				String right = expressionToString(operation.rhs);
+				String operator = "";
 
-	private void generateNode(ASTNode astNode) {
-		for (ASTNode node : astNode.getChildren()) {
-			if (node instanceof Stylerule) {
-				this.generateSelector(node);
-
-				this.generateDeclaration(node);
-
-				this.stringBuilder.append("}\n\n");
+				if (operation instanceof AddOperation) {
+					operator = " + ";
+				} else if (operation instanceof SubtractOperation) {
+					operator = " - ";
+				} else if (operation instanceof MultiplyOperation) {
+					operator = " * ";
+				}
+				return "(" + left + operator + right + ")";
+			} else if (expression instanceof VariableReference) {
+				return ((VariableReference) expression).name;
 			}
+		} else {
+			PercentageLiteral percentage = (PercentageLiteral) expression;
+			return percentage.value + "%";
 		}
-
-		// Remove one \n character.
-		if (this.stringBuilder.length() > 1) {
-			this.stringBuilder.delete(this.stringBuilder.length() - 1, this.stringBuilder.length());
-		}
-	}
-
-	private void generateSelector(ASTNode astNode) {
-		Stylerule stylerule = (Stylerule) astNode;
-
-		List<String> selectors = stylerule.selectors.stream()
-				.map(ASTNode::toString)
-				.collect(Collectors.toList());
-
-		String str = String.join(", ", selectors);
-		this.stringBuilder.append(str);
-
-		this.stringBuilder.append(" {\n");
-	}
-
-	private void generateDeclaration(ASTNode astNode) {
-		for (ASTNode node : astNode.getChildren()) {
-			if (node instanceof Declaration) {
-				Declaration declaration = (Declaration) node;
-				this.stringBuilder.append("  ")
-						.append(declaration.property.name)
-						.append(": ")
-						.append(this.expressionToString(declaration.expression))
-						.append(";\n");
-			}
-		}
-	}
-
-	private String expressionToString(Expression expression) {
-		if (expression instanceof PercentageLiteral) {
-			return ((PercentageLiteral) expression).value + "%";
-		}
-		if (expression instanceof PixelLiteral) {
-			return ((PixelLiteral) expression).value + "px";
-		}
-		if (expression instanceof ColorLiteral) {
-			return ((ColorLiteral) expression).value + "";
-		}
-
-		return "";
-	}
+        return "";
+    }
 }
